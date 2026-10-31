@@ -1,0 +1,14 @@
+name: Check code formatting
+on:
+  pull_request:
+jobs:
+  code_formatter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create comments file
+        run: echo '[]' > comments
+      - name: Upload artifact with attacker controlled name
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: workflow-args$(touch PWNED_BY_ARTIFACT_NAME)
+          path: comments
